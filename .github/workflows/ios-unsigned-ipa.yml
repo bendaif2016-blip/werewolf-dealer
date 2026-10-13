@@ -1,0 +1,29 @@
+name: iOS unsigned IPA
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  ipa:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: werewolf-native 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install
+      - run: npx expo prebuild --platform ios --clean
+      - name: Build without signing
+        working-directory: werewolf-native 2/ios
+        run: |
+          APP=$(ls -d *.xcworkspace | head -1 | sed 's/.xcworkspace//')
+          xcodebuild -workspace "$APP.xcworkspace" -scheme "$APP" -configuration Release -sdk iphoneos \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+          mkdir Payload && cp -R "build/Build/Products/Release-iphoneos/$APP.app" Payload/
+          zip -qr ../WerewolfDealer-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with: { name: ipa, path: "werewolf-native 2/WerewolfDealer-unsigned.ipa" }
