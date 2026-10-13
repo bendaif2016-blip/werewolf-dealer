@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Werewolf Dealer",
+    "slug": "werewolf-dealer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": { "image": "./assets/splash-icon.png", "resizeMode": "contain", "backgroundColor": "#14151f" },
+    "ios": { "supportsTablet": false, "bundleIdentifier": "com.yourname.werewolfdealer", "buildNumber": "1" },
+    "android": {
+      "package": "com.yourname.werewolfdealer",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#14151f",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": { "favicon": "./assets/favicon.png" },
+    "plugins": ["expo-font"]
+  }
+}
