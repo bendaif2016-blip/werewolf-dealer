@@ -8,22 +8,27 @@ permissions:
 jobs:
   ipa:
     runs-on: macos-15
-    defaults:
-      run:
-        working-directory: werewolf-native
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: npm install
-      - run: npx expo prebuild --platform ios --clean
-      - name: Build without signing
-        working-directory: werewolf-native/ios
+      - name: Prepare Expo assets
         run: |
-          APP=$(ls -d *.xcworkspace | head -1 | sed 's/.xcworkspace//')
+          mkdir -p assets
+          cp icon.png splash-icon.png favicon.png assets/
+          cp android-icon-*.png assets/
+      - run: npm ci
+      - run: npx expo prebuild --platform ios --clean
+      - name: Install CocoaPods dependencies
+        run: npx pod-install ios
+      - name: Build without signing
+        working-directory: ios
+        run: |
+          APP=$(find . -maxdepth 1 -name '*.xcworkspace' -print -quit | sed 's#^./##; s/.xcworkspace$//')
+          test -n "$APP" || { echo "No Xcode workspace found" >&2; exit 1; }
           xcodebuild -workspace "$APP.xcworkspace" -scheme "$APP" -configuration Release -sdk iphoneos \
             -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
           mkdir Payload && cp -R "build/Build/Products/Release-iphoneos/$APP.app" Payload/
           zip -qr ../WerewolfDealer-unsigned.ipa Payload
       - uses: actions/upload-artifact@v4
-        with: { name: ipa, path: "werewolf-native/WerewolfDealer-unsigned.ipa" }
+        with: { name: ipa, path: "WerewolfDealer-unsigned.ipa" }
